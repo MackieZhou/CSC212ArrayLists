@@ -2,11 +2,13 @@ package edu.smith.cs.csc212.lists;
 
 import me.jjfoley.adt.ArrayWrapper;
 import me.jjfoley.adt.ListADT;
+import me.jjfoley.adt.errors.BadIndexError;
 import me.jjfoley.adt.errors.RanOutOfSpaceError;
 import me.jjfoley.adt.errors.TODOErr;
 
 /**
  * FixedSizeList is a List with a maximum size.
+ * 
  * @author jfoley
  *
  * @param <T>
@@ -23,6 +25,7 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	/**
 	 * Construct a new FixedSizeList with a given maximum size.
+	 * 
 	 * @param maximumSize - the size of the array to use.
 	 */
 	public FixedSizeList(int maximumSize) {
@@ -56,18 +59,34 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	@Override
 	public T getFront() {
-		throw new TODOErr();
+		checkNotEmpty();
+		return this.array.getIndex(0);
 	}
 
 	@Override
 	public T getBack() {
-		throw new TODOErr();
+		checkNotEmpty();
+		return this.array.getIndex(this.fill - 1);
 	}
 
 	@Override
 	public void addIndex(int index, T value) {
-		// slide to the right
-		throw new TODOErr();
+		if (index < 0 || index > this.fill) {
+			throw new BadIndexError(index);
+		}
+
+		if (index == this.fill) {
+			this.addBack(value);
+		} else if (fill < array.size()) {
+			for (int i = this.fill; i > index; i--) {
+				this.array.setIndex(i, this.getIndex(i - 1));
+			}
+			this.setIndex(index, value);
+			this.fill += 1;
+		} else {
+			throw new RanOutOfSpaceError();
+		}
+
 	}
 
 	@Override
@@ -86,18 +105,39 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	@Override
 	public T removeIndex(int index) {
+		T deleted = this.getIndex(index);
+		this.fill -= 1;
+
 		// slide to the left
-		throw new TODOErr();
+		for (int i = index; i < this.fill; i++) {
+			this.array.setIndex(i, this.array.getIndex(i + 1));
+		}
+
+		return deleted;
 	}
 
 	@Override
 	public T removeBack() {
-		throw new TODOErr();
+		T back = this.getIndex(this.fill - 1);
+		this.fill -= 1;
+		this.array.setIndex(this.fill, null);
+
+		return back;
 	}
 
 	@Override
 	public T removeFront() {
-		return removeIndex(0);
+		T front = this.getIndex(0);
+		this.fill -= 1;
+
+		// slide to the left
+		for (int i = 0; i < this.fill; i++) {
+			this.array.setIndex(i, this.array.getIndex(i + 1));
+		}
+
+		this.array.setIndex(this.fill, null);
+
+		return front;
 	}
 
 	/**
