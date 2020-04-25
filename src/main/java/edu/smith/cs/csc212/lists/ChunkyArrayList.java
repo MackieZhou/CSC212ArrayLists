@@ -120,6 +120,12 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 
 	@Override
 	public void addIndex(int index, T item) {
+		// if add to the end - use addBack directly!
+		if (index == this.size()) {
+			this.addBack(item);
+			return;
+		}
+
 		int chunkIndex = 0;
 		int start = 0;
 		for (FixedSizeList<T> chunk : this.chunks) {
@@ -127,7 +133,7 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 			int end = start + chunk.size();
 
 			// Check whether the index should be in this chunk:
-			if (start <= index && index <= end) {
+			if (start <= index && index < end) {
 				if (chunk.isFull()) {
 					// check can roll to next or need a new chunk
 					FixedSizeList<T> insert = makeChunk();
